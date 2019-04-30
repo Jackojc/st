@@ -5,10 +5,9 @@ build_remove="$build_depends"
 depends="fontconfig libXft"
 
 
-sudo xbps-install -S $build_depends $depends
+sudo xbps-install -yS $build_depends $depends
 
 make clean
 make
 
-
-sudo xbps-remove -R $build_remove
+sudo xbps-remove -yR $build_remove
