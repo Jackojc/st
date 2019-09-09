@@ -1887,6 +1887,10 @@ strhandle(void)
 	case 'P': /* DCS -- Device Control String */
 		term.mode |= ESC_DCS;
 	case '_': /* APC -- Application Program Command */
+		if(par == 0 && narg > 1) {
+			int dir = chdir(strescseq.args[1]);
+			(void)dir;
+		}
 	case '^': /* PM -- Privacy Message */
 		return;
 	}
