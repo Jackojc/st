@@ -5,8 +5,8 @@
  *
  * font: see http://freedesktop.org/software/fontconfig/fontconfig-user.html
  */
-static char *font = "Consolas:pixelsize=17:antialias=true:autohint=true";
-static int borderpx = 15;
+static char *font = "Cascadia Code:pixelsize=17:antialias=true:autohint=false";
+static int borderpx = 10;
 
 /*
  * What program is execed by st depends of these precedence rules:
