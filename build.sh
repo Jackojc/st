@@ -4,7 +4,7 @@ build_depends="pkg-config fontconfig-devel libXft-devel"
 build_remove="$build_depends"
 depends="fontconfig libXft"
 
-export CFLAGS="$CFLAGS -msse2 -march=native -m64 -Ofast -finline-limit=200 -fipa-pta -fsplit-loops -funswitch-loops"
+export CFLAGS="$CFLAGS -march=native -m64 -Ofast -finline-limit=200 -fipa-pta -fsplit-loops -funswitch-loops"
 
 sudo xbps-install -yS $build_depends $depends
 
