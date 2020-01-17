@@ -5,8 +5,8 @@
  *
  * font: see http://freedesktop.org/software/fontconfig/fontconfig-user.html
  */
-static char *font = "Cascadia Code:pixelsize=17:antialias=true:autohint=false";
-static int borderpx = 10;
+static char *font = "JetBrains Mono:pixelsize=15:antialias=true:autohint=false";
+static int borderpx = 5;
 
 /*
  * What program is execed by st depends of these precedence rules:
@@ -95,7 +95,7 @@ char *termname = "st-256color";
 unsigned int tabspaces = 4;
 
 /* bg opacity */
-float alpha = 0.94;
+float alpha = 0.96;
 
 /* Terminal colors (16 first used in escape sequence) */
 static const char *colorname[] = {
