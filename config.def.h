@@ -5,7 +5,7 @@
  *
  * font: see http://freedesktop.org/software/fontconfig/fontconfig-user.html
  */
-static char *font = "JetBrains Mono:pixelsize=15:antialias=true:autohint=false";
+static char *font = "Consolas:pixelsize=17:antialias=true:autohint=true";
 static int borderpx = 5;
 
 /*
@@ -42,8 +42,8 @@ static unsigned int tripleclicktimeout = 600;
 int allowaltscreen = 1;
 
 /* frames per second st should at maximum draw to the screen */
-static unsigned int xfps = 240;
-static unsigned int actionfps = 60;
+static unsigned int xfps = 999;
+static unsigned int actionfps = 999;
 
 /*
  * blinking timeout (set to 0 to disable blinking) for the terminal blinking
@@ -95,7 +95,7 @@ char *termname = "st-256color";
 unsigned int tabspaces = 4;
 
 /* bg opacity */
-float alpha = 0.96;
+float alpha = 0.98;
 
 /* Terminal colors (16 first used in escape sequence) */
 static const char *colorname[] = {
@@ -121,7 +121,7 @@ static const char *colorname[] = {
   [15] = "#e8e8d3", /* white   */
 
   /* special colors */
-  [256] = "#050505", /* background */
+  [256] = "#060606", /* background */
   [257] = "#f5f5f5", /* foreground */
 };
 
