@@ -19,7 +19,7 @@ config.h:
 	cp config.def.h config.h
 
 .c.o:
-	$(CC) -s -Ofast $(STCFLAGS) -c $<
+	$(CC) $(STCFLAGS) -c $<
 
 st.o: config.h st.h win.h
 x.o: arg.h config.h st.h win.h
@@ -28,7 +28,7 @@ boxdraw.o: config.h st.h boxdraw_data.h
 $(OBJ): config.h config.mk
 
 st: $(OBJ)
-	$(CC) -flto -Ofast -s -o $@ $(OBJ) $(STLDFLAGS)
+	$(CC) -o $@ $(OBJ) $(STLDFLAGS)
 
 clean:
 	rm -f st $(OBJ) st-$(VERSION).tar.gz

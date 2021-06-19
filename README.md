@@ -1,9 +1,20 @@
 # st
 st with custom patches
 
-build.sh script is for use with void linux.
+Runtime Dependencies:
+- fontconfig
+- libXft
+
+Buildtime Dependencies:
+- pkg-config
+- fontconfig-devel
+- libXft-devel
 
 Patches:
-- Alpha (https://st.suckless.org/patches/alpha/)
-- Boxdraw (https://st.suckless.org/patches/boxdraw/)
-- Clipboard (https://st.suckless.org/patches/clipboard/)
+- alpha (https://st.suckless.org/patches/alpha/)
+- boxdraw (https://st.suckless.org/patches/boxdraw/)
+- clipboard (https://st.suckless.org/patches/clipboard/)
+- anysize (https://st.suckless.org/patches/anysize/)
+- bold is not bright (https://st.suckless.org/patches/bold-is-not-bright/)
+- scrollback (https://st.suckless.org/patches/scrollback/)
+- cwd (custom patch)

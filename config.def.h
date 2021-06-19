@@ -5,19 +5,21 @@
  *
  * font: see http://freedesktop.org/software/fontconfig/fontconfig-user.html
  */
-static char *font = "JetBrains Mono:pixelsize=15:antialias=true:autohint=false";
+static char *font = "JetBrains Mono:pixelsize=15:antialias=true:autohint=true";
 static int borderpx = 5;
 
 /*
  * What program is execed by st depends of these precedence rules:
  * 1: program passed with -e
- * 2: utmp option
+ * 2: scroll and/or utmp
  * 3: SHELL environment variable
  * 4: value of shell in /etc/passwd
  * 5: value of shell in config.h
  */
 static char *shell = "/usr/bin/env sh";
 char *utmp = NULL;
+/* scroll program: to enable use a string like "scroll" */
+char *scroll = NULL;
 char *stty_args = "stty raw pass8 nl -echo -iexten -cstopb 38400";
 
 /* identification sequence returned in DA and DECID */
@@ -32,7 +34,7 @@ static float chscale = 1.0;
  *
  * More advanced example: L" `'\"()[]{}"
  */
-wchar_t *worddelimiters = L" `'\"()[]{}";
+wchar_t *worddelimiters = L" `'\"()[]{}-_";
 
 /* selection timeouts (in milliseconds) */
 static unsigned int doubleclicktimeout = 300;
@@ -41,9 +43,18 @@ static unsigned int tripleclicktimeout = 600;
 /* alt screens */
 int allowaltscreen = 1;
 
-/* frames per second st should at maximum draw to the screen */
-static unsigned int xfps = 60;
-static unsigned int actionfps = 60;
+/* allow certain non-interactive (insecure) window operations such as:
+   setting the clipboard text */
+int allowwindowops = 0;
+
+/*
+ * draw latency range in ms - from new content/keypress/etc until drawing.
+ * within this range, st draws when content stops arriving (idle). mostly it's
+ * near minlatency, but it waits longer for slow updates to avoid partial draw.
+ * low minlatency will tear/flicker more, as it can "detect" idle too early.
+ */
+static double minlatency = 16;
+static double maxlatency = 33;
 
 /*
  * blinking timeout (set to 0 to disable blinking) for the terminal blinking
@@ -95,55 +106,44 @@ char *termname = "st-256color";
 unsigned int tabspaces = 4;
 
 /* bg opacity */
-float alpha = 0.97;
+float alpha = 1.0f;
 
 /* Terminal colors (16 first used in escape sequence) */
 static const char *colorname[] = {
+	/* 8 normal colors */
+	[0] = "#292929", /* black   */
+	[1] = "#cf6a4c", /* red     */
+	[2] = "#19cb00", /* green   */
+	[3] = "#fad07a", /* yellow  */
+	[4] = "#8197bf", /* blue    */
+	[5] = "#8787af", /* magenta */
+	[6] = "#668799", /* cyan    */
+	[7] = "#888888", /* white   */
 
-  /* 8 normal colors */
-  [0] = "#292929", /* black   */
-  [1] = "#cf6a4c", /* red     */
-  [2] = "#19cb00", /* green   */
-  [3] = "#fad07a", /* yellow  */
-  [4] = "#8197bf", /* blue    */
-  [5] = "#8787af", /* magenta */
-  [6] = "#668799", /* cyan    */
-  [7] = "#888888", /* white   */
+	/* 8 bright colors */
+	[8]  = "#525252", /* black   */
+	[9]  = "#ff9d80", /* red     */
+	[10] = "#23fd00", /* green   */
+	[11] = "#ffefbf", /* yellow  */
+	[12] = "#accaff", /* blue    */
+	[13] = "#c4c4ff", /* magenta */
+	[14] = "#80bfaf", /* cyan    */
+	[15] = "#e8e8d3", /* white   */
 
-  /* 8 bright colors */
-  [8]  = "#525252", /* black   */
-  [9]  = "#ff9d80", /* red     */
-  [10] = "#23fd00", /* green   */
-  [11] = "#ffefbf", /* yellow  */
-  [12] = "#accaff", /* blue    */
-  [13] = "#c4c4ff", /* magenta */
-  [14] = "#80bfaf", /* cyan    */
-  [15] = "#e8e8d3", /* white   */
-
-  /* special colors */
-  [256] = "#060606", /* background */
-  [257] = "#f5f5f5", /* foreground */
+	/* special colors */
+	[256] = "#090909", /* background */
+	[257] = "#FFFFFF", /* foreground */
 };
 
 
 /*
  * Default colors (colorname index)
- * foreground, background, cursor
+ * foreground, background, cursor, reverse cursor
  */
 unsigned int defaultfg = 257;
 unsigned int defaultbg = 256;
 static unsigned int defaultcs = 257;
 static unsigned int defaultrcs = 256;
-
-/*
- * Colors used, when the specific fg == defaultfg. So in reverse mode this
- * will reverse too. Another logic would only make the simple feature too
- * complex.
- */
-static unsigned int defaultitalic = 7;
-static unsigned int defaultunderline = 7;
-
-
 /*
  * Default shape of cursor
  * 2: Block ("█")
@@ -163,7 +163,7 @@ static unsigned int rows = 24;
 /*
  * Default colour and shape of the mouse cursor
  */
-static unsigned int mouseshape = XC_left_ptr;
+static unsigned int mouseshape = XC_xterm;
 static unsigned int mousefg = 7;
 static unsigned int mousebg = 0;
 
@@ -174,25 +174,23 @@ static unsigned int mousebg = 0;
 static unsigned int defaultattr = 11;
 
 /*
+ * Force mouse select/shortcuts while mask is active (when MODE_MOUSE is set).
+ * Note that if you want to use ShiftMask with selmasks, set this to an other
+ * modifier, set to 0 to not use it.
+ */
+static uint forcemousemod = ShiftMask;
+
+/*
  * Internal mouse shortcuts.
  * Beware that overloading Button1 will disable the selection.
  */
 static MouseShortcut mshortcuts[] = {
-	/* button               mask            string */
-	// { Button4,              XK_ANY_MOD,     "\031" },
-	// { Button5,              XK_ANY_MOD,     "\005" },
-	{ Button4,              XK_NO_MOD,      "\031" },
-	{ Button5,              XK_NO_MOD,      "\005" },
+	/* mask                 button   function        argument       release */
+	// { XK_NO_MOD,           Button4, ttysend,        {.s = "\031"} },
+	// { XK_NO_MOD,           Button5, ttysend,        {.s = "\005"} },
+	{ XK_NO_MOD,           Button4, kscrollup,      {.i = 1     } },
+	{ XK_NO_MOD,           Button5, kscrolldown,    {.i = 1     } },
 };
-
-
-MouseKey mkeys[] = {
-	/* button               mask            function        argument */
-	{ Button4,              XK_NO_MOD,      kscrollup,      {.i =  1} },
-	{ Button5,              XK_NO_MOD,      kscrolldown,    {.i =  1} },
- };
-
-
 
 /* Internal keyboard shortcuts. */
 #define MODKEY Mod1Mask
@@ -232,10 +230,6 @@ static Shortcut shortcuts[] = {
  * * 0: no value
  * * > 0: cursor application mode enabled
  * * < 0: cursor application mode disabled
- * crlf value
- * * 0: no value
- * * > 0: crlf mode is enabled
- * * < 0: crlf mode is disabled
  *
  * Be careful with the order of the definitions because st searches in
  * this table sequentially, so any XK_ANY_MOD must be in the last
@@ -253,13 +247,6 @@ static KeySym mappedkeys[] = { -1 };
  * numlock (Mod2Mask) and keyboard layout (XK_SWITCH_MOD) are ignored.
  */
 static uint ignoremod = Mod2Mask|XK_SWITCH_MOD;
-
-/*
- * Override mouse-select while mask is active (when MODE_MOUSE is set).
- * Note that if you want to use ShiftMask with selmasks, set this to an other
- * modifier, set to 0 to not use it.
- */
-static uint forceselmod = ShiftMask;
 
 /*
  * This is the huge key array which defines all compatibility to the Linux
@@ -496,6 +483,7 @@ static Key key[] = {
 	{ XK_F34,           XK_NO_MOD,      "\033[21;5~",    0,    0},
 	{ XK_F35,           XK_NO_MOD,      "\033[23;5~",    0,    0},
 };
+
 
 /*
  * Selection types' masks.
