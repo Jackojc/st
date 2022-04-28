@@ -5,7 +5,7 @@
  *
  * font: see http://freedesktop.org/software/fontconfig/fontconfig-user.html
  */
-static char *font = "APL385 Unicode:pixelsize=17:antialias=true:autohint=true";
+static char *font = "APL386 Unicode:pixelsize=17:antialias=true:autohint=false";
 static int borderpx = 5;
 
 /*
