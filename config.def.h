@@ -5,8 +5,8 @@
  *
  * font: see http://freedesktop.org/software/fontconfig/fontconfig-user.html
  */
-static char *font = "APL386 Unicode:pixelsize=17:antialias=true:autohint=false";
-static int borderpx = 5;
+static char *font = "APL386 Unicode:pixelsize=14:antialias=true:autohint=false";
+static int borderpx = 2;
 
 /*
  * What program is execed by st depends of these precedence rules:
@@ -428,6 +428,7 @@ static Key key[] = {
 	{ XK_Next,          XK_ANY_MOD,     "\033[6~",       0,    0},
 
 	{ XK_Delete,        XK_ANY_MOD,		"\033[3~",	     0,    0},
+	{ XK_Delete,        ShiftMask,		"\033[3~",	     0,    0},
 
 	{ XK_BackSpace,     XK_NO_MOD,      "\177",          0,    0},
 	{ XK_BackSpace,     Mod1Mask,       "\033\177",      0,    0},
