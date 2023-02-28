@@ -5,8 +5,8 @@
  *
  * font: see http://freedesktop.org/software/fontconfig/fontconfig-user.html
  */
-static char *font = "APL386 Unicode:pixelsize=14:antialias=true:autohint=false";
-static int borderpx = 2;
+static char *font = "APL386 Unicode:pixelsize=14:antialias=true:autohint=true";
+static int borderpx = 5;
 
 /*
  * What program is execed by st depends of these precedence rules:
@@ -106,7 +106,7 @@ char *termname = "st-256color";
 unsigned int tabspaces = 4;
 
 /* bg opacity */
-float alpha = 1.0f;
+float alpha = 0.99f;
 
 /* Terminal colors (16 first used in escape sequence) */
 static const char *colorname[] = {

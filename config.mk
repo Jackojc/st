@@ -23,7 +23,7 @@ LIBS = -L$(X11LIB) -lm -lrt -lX11 -lutil -lXft -lXrender\
 # flags
 STCPPFLAGS = -DVERSION=\"$(VERSION)\" -D_XOPEN_SOURCE=600
 STCFLAGS = $(INCS) $(STCPPFLAGS) $(CPPFLAGS) $(CFLAGS) \
-           -march=native -m64 -Ofast -finline-limit=200 -fipa-pta -fsplit-loops -funswitch-loops
+           -Wall -Wextra -march=native -m64 -Ofast -finline-limit=200 -fipa-pta -fsplit-loops -funswitch-loops
 STLDFLAGS = $(LIBS) $(LDFLAGS)
 
 # OpenBSD:
